@@ -6,7 +6,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-using namespace flatbuffers;
+using namespace flatbuffers; // AI! remove
 
 int createSocketConnection() {
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
