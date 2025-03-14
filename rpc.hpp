@@ -7,12 +7,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-// Encode RPC request using flatbuffers
-flatbuffers::FlatBufferBuilder encodeRequest(const RPCRequest& req); // AI! remove
-
-// Send RPC request and get response
-RPCResponse rpc_send(int sockfd, const RPCRequest& req);
-
 // Send RPC request and get response
 RPCResponse rpc_send(int sockfd, const RPCRequest& req);
 
