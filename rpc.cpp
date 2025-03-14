@@ -2,39 +2,52 @@
 #include <cstring>
 #include <iostream>
 #include <unistd.h>
-#include <flatbuffers/flatbuffers.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 using namespace flatbuffers;
 
-FlatBufferBuilder encodeRequest(const RPCRequest& req) {
-    FlatBufferBuilder builder(1024);
-    
-    // Create string
-    auto payload = builder.CreateString(req.payload);
-    
-    // Create request
-    auto request = CreateRPCRequest(builder, static_cast<int>(req.type), payload);
-    
-    // Finalize and get data
-    builder.Finish(request);
-    return builder;
-}
-
-RPCResponse decodeResponse(const uint8_t* data, size_t len) {
-    RPCResponse response;
-    const char* error = verifyRPCResponse(data, len);
-    if (error) {
-        throw std::runtime_error(std::string("Flatbuffers error: ") + error);
+int createSocketConnection() {
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        throw std::runtime_error("Failed to create socket");
     }
     
-    const auto& resp = GetRPCResponse(data);
-    for (auto it = resp.results()->begin(); it != resp.results()->end(); ++it) {
-        response.results.push_back((*it)->str());
+    struct sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(8080);
+    inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr);
+    
+    if (connect(sockfd, reinterpret_cast<struct sockaddr*>(&server_addr), sizeof(server_addr)) < 0) {
+        throw std::runtime_error("Failed to connect to server");
     }
-    return response;
+    
+    return sockfd;
 }
 
-RPCResponse rpc_send(int sockfd, const RPCRequest& req) {
+void handleRPC(int sockfd, const RPCRequest& req) {
+
+    // Send request and get response
+    send(sockfd, reinterpret_cast<const char*>(data), len, 0);
+    
+    // Receive response
+    char buffer[1024];
+    int bytes_received = recv(sockfd, buffer, 1024, 0);
+    if (bytes_received < 0) {
+        throw std::runtime_error("Failed to receive response");
+    }
+    
+    // Parse HTTP response and extract body
+    std::string response(buffer, bytes_received);
+    size_t body_start = response.find("\r\n\r\n") + 4;
+    if (body_start == std::string::npos) {
+        throw std::runtime_error("Invalid HTTP response");
+    }
+    
+    return decodeResponse(reinterpret_cast<const uint8_t&>(response[body_start]),
+                          response.length() - body_start);
+}
     // Encode request
     auto builder = encodeRequest(req);
     const uint8_t* data = builder.GetBufferPointer();
