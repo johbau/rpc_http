@@ -5,24 +5,20 @@
 
 using namespace rpc;
 
-void RpcClient::createSocketConnection(const ConnectionParams& params) {
+RpcClient::RpcClient(const char* host, const uint16_t port) {
     sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd_ < 0) {
         throw std::runtime_error("Failed to create socket");
     }
-    
+
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(params.port);
-    inet_pton(AF_INET, params.host, &server_addr.sin_addr);
-    
+    server_addr.sin_port = htons(port);
+    inet_pton(AF_INET, host, &server_addr.sin_addr);
+
     if (connect(sockfd_, reinterpret_cast<struct sockaddr*>(&server_addr), sizeof(server_addr)) < 0) {
         throw std::runtime_error("Failed to connect to server");
     }
-}
-
-RpcClient::RpcClient(const ConnectionParams& params) {
-    createSocketConnection(params);
 }
 
 RpcClient::~RpcClient() {

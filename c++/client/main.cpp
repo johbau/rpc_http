@@ -12,8 +12,7 @@ using namespace flatbuffers;
 int main() {
     // Create an RPC client
     std::cout << "Create RpcClient" << std::endl;
-    const rpc::ConnectionParams params = {"127.0.0.1", 7777};
-    RpcClient client(params);
+    RpcClient client("127.0.0.1", 7777);
 
     // Create a FlatBuffer request
     std::cout << "Create flatbuffers builder" << std::endl;
@@ -32,7 +31,7 @@ int main() {
     unsigned char response[size] = {0};
     std:size_t offset = 0;
     try {
-        client.sendRequest(fbb.GetBufferPointer(), fbb.GetSize(), response, size, &offset);
+        client.sendRequest(fbb.GetBufferPointer(), fbb.GetSize(), response, size, offset);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;

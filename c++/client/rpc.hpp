@@ -14,20 +14,13 @@ namespace rpc {
 
 class RpcClient {
 public:
-    struct ConnectionParams {
-        const char* host;
-        uint16_t port;
-    };
-
-    RpcClient(const ConnectionParams& params);
+    RpcClient(const char* host, const uint16_t port);
     ~RpcClient();
     
     void sendRequest(unsigned char *request, std::size_t request_size, unsigned char *response, std::size_t response_size, std::size_t& offset);
 
 private:
     int sockfd_;
-    
-    void createSocketConnection(const ConnectionParams& params);
 };
 
 } // namespace rpc
