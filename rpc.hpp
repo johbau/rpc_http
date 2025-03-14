@@ -11,3 +11,5 @@
 RPCResponse rpc_send(int sockfd, const RPCRequest& req);
 
 #endif // RPC_HPP
+
+#endif // RPC_HPP

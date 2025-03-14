@@ -1,3 +1,4 @@
+#include "socket_client.hpp"
 #include "rpc.hpp"
 #include <iostream>
 #include <flatbuffers/flatbuffers.h>
