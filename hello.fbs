@@ -1,0 +1,8 @@
+enum EnumType: byte = HELLO, GOODBYE;
+struct RPCRequest {
+    type: EnumType;
+    payload: string;
+}
+struct RPCResponse {
+    results: [string];
+}
