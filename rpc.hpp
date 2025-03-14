@@ -1,32 +1,17 @@
 #ifndef RPC_HPP
 #define RPC_HPP
 
-#include <flatbuffers/flatbuffers.h> // AI! remove
 #include <string>
 #include <vector>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-enum class EnumType { // AI! move to main.cpp
-    HELLO,
-    GOODBYE
-};
-
-struct RPCRequest { // AI! move to main.cpp
-    EnumType type;
-    std::string payload;
-};
-
-struct RPCResponse { // AI! move to main.cpp
-    std::vector<std::string> results;
-};
-
 // Encode RPC request using flatbuffers
 flatbuffers::FlatBufferBuilder encodeRequest(const RPCRequest& req);
 
-// Decode RPC response from flatbuffer data
-RPCResponse decodeResponse(const uint8_t* data, size_t len); // AI! remove
+// Send RPC request and get response
+RPCResponse rpc_send(int sockfd, const RPCRequest& req);
 
 // Send RPC request and get response
 RPCResponse rpc_send(int sockfd, const RPCRequest& req);

@@ -2,6 +2,20 @@
 #include <iostream>
 #include <flatbuffers/flatbuffers.h>
 
+enum class EnumType {
+    HELLO,
+    GOODBYE
+};
+
+struct RPCRequest {
+    EnumType type;
+    std::string payload;
+};
+
+struct RPCResponse {
+    std::vector<std::string> results;
+};
+
 FlatBufferBuilder encodeRequest(const RPCRequest& req) {
     FlatBufferBuilder builder(1024);
     
