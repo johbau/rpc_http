@@ -1,15 +1,35 @@
 #ifndef RPC_HPP
 #define RPC_HPP
 
-#include <string>
-#include <vector>
+#include <cstdint>
+#include <cstring>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <cstdlib> // for std::exit
 
-// Send RPC request and get response
-RPCResponse rpc_send(int sockfd, const RPCRequest& req);
+#define MAX_SIZE 16384
 
-#endif // RPC_HPP
+namespace rpc {
+
+class RpcClient {
+public:
+    struct ConnectionParams {
+        const char* host;
+        uint16_t port;
+    };
+
+    RpcClient(const ConnectionParams& params);
+    ~RpcClient();
+    
+    void sendRequest(unsigned char *request, std::size_t request_size, unsigned char *response, std::size_t response_size, std::size_t& offset);
+
+private:
+    int sockfd_;
+    
+    void createSocketConnection(const ConnectionParams& params);
+};
+
+} // namespace rpc
 
 #endif // RPC_HPP

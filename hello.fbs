@@ -1,8 +1,25 @@
-enum EnumType: byte = HELLO, GOODBYE;
-struct RPCRequest {
-    type: EnumType;
-    payload: string;
+namespace Hello;
+
+// Define request type enum
+enum RequestType:byte {
+    UNKNOWN = 0,
+    GREETING = 1,
+    GOODBYE = 2
 }
-struct RPCResponse {
-    results: [string];
+
+// Define our request message
+table HelloRequest {
+    request_type: RequestType;
+    message: string;
 }
+
+// Mark HelloRequest as the root type
+root_type HelloRequest;
+
+// Define our response message
+table HelloResponse {
+    result: [string];
+}
+
+// Mark HelloResponse as the root type
+root_type HelloResponse;
