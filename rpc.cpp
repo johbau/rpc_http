@@ -26,28 +26,7 @@ int createSocketConnection() {
     return sockfd;
 }
 
-void handleRPC(int sockfd, const RPCRequest& req) {
-
-    // Send request and get response
-    send(sockfd, reinterpret_cast<const char*>(data), len, 0);
-    
-    // Receive response
-    char buffer[1024];
-    int bytes_received = recv(sockfd, buffer, 1024, 0);
-    if (bytes_received < 0) {
-        throw std::runtime_error("Failed to receive response");
-    }
-    
-    // Parse HTTP response and extract body
-    std::string response(buffer, bytes_received);
-    size_t body_start = response.find("\r\n\r\n") + 4;
-    if (body_start == std::string::npos) {
-        throw std::runtime_error("Invalid HTTP response");
-    }
-    
-    return decodeResponse(reinterpret_cast<const uint8_t&>(response[body_start]),
-                          response.length() - body_start);
-}
+RPCResponse handleRPC(int sockfd, const RPCRequest& req) {
     // Encode request
     auto builder = encodeRequest(req);
     const uint8_t* data = builder.GetBufferPointer();

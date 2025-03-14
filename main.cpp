@@ -32,20 +32,13 @@ RPCResponse decodeResponse(const uint8_t* data, size_t len) {
 
 int main() {
     try {
-        // Create request
+        // Create and encode request
         RPCRequest req;
         req.type = EnumType::HELLO;
         req.payload = "World";
-        
-        // Encode request
         auto builder = encodeRequest(req);
         const uint8_t* data = builder.GetBufferPointer();
         size_t len = builder.GetSize();
-        
-        // Create request
-        RPCRequest req;
-        req.type = EnumType::HELLO;
-        req.payload = "World";
         
         // Send request and get response
         RPCResponse resp = rpc_send(sockfd, req);
