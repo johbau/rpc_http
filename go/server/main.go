@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"net/http"
 	"bufio"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
 
 	"github.com/google/flatbuffers/go"
 	"github.com/johbau/rpc_http/go/Hello"
@@ -25,44 +26,45 @@ func rpcHandler(w http.ResponseWriter, r *http.Request) {
 	// Read the request body
 	reader := bufio.NewReader(r.Body)
 	buf := make([]byte, 16384)
-	_, err := reader.Read(buf)
-	if err != nil {
+	n, err := reader.Read(buf)
+	fmt.Printf("reader.Read returned: n=%v err=%v\n", n, err)
+	if err != nil && err != io.EOF {
 		fmt.Printf("Error reading request body: %v\n", err)
 		http.Error(w, "Failed to read request body", http.StatusInternalServerError)
 		return
 	}
 
-    // Process the request using FlatBuffers schema
-    request := Hello.GetRootAsHelloRequest(buf, 0)
-    if request == nil {
-        fmt.Printf("Failed to parse request\n")
-        return
-    }
+	// Process the request using FlatBuffers schema
+	request := Hello.GetRootAsHelloRequest(buf, 0)
+	if request == nil {
+		fmt.Printf("Failed to parse request\n")
+		return
+	}
 
-    requestType := request.RequestType()
-    switch requestType {
-    case Hello.RequestTypeGREETING:
-        fmt.Printf("request GREETING\n")
-    case Hello.RequestTypeGOODBYE:
-        fmt.Printf("request GOODBYE\n")
-    default:
-        fmt.Printf("unknown request\n")
-    }
-    message := string(request.Message())
-    fmt.Printf("message: %s\n", message)
+	requestType := request.RequestType()
+	switch requestType {
+	case Hello.RequestTypeGREETING:
+		fmt.Printf("request GREETING\n")
+	case Hello.RequestTypeGOODBYE:
+		fmt.Printf("request GOODBYE\n")
+	default:
+		fmt.Printf("unknown request\n")
+	}
+	message := string(request.Message())
+	fmt.Printf("message: %s\n", message)
 
-    // Create a buffer for FlatBuffers
-    builder := flatbuffers.NewBuilder(16384)
+	// Create a buffer for FlatBuffers
+	builder := flatbuffers.NewBuilder(16384)
 
-    // Create the response using the Flatbuffers schema
-    result1 := builder.CreateString("Hello client")
-    Hello.HelloResponseStartResultVector(builder, 1)
-    builder.PrependUOffsetT(result1)
-    result := builder.EndVector(1)
-    Hello.HelloResponseStart(builder)
-    Hello.HelloResponseAddResult(builder, result)
-    response := Hello.HelloResponseEnd(builder)
-    builder.Finish(response)
+	// Create the response using the Flatbuffers schema
+	result1 := builder.CreateString("Hello client")
+	Hello.HelloResponseStartResultVector(builder, 1)
+	builder.PrependUOffsetT(result1)
+	result := builder.EndVector(1)
+	Hello.HelloResponseStart(builder)
+	Hello.HelloResponseAddResult(builder, result)
+	response := Hello.HelloResponseEnd(builder)
+	builder.Finish(response)
 
 	// Set response headers
 	w.Header().Set("Content-Type", "application/octet-stream")
@@ -77,19 +79,19 @@ func rpcHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	fmt.Println("Starting RPC server on :7777")
-	
+
 	// Create a new HTTP server
 	srv := &http.Server{
 		Addr:    ":7777",
 		Handler: nil,
 	}
-	
+
 	// Register the handler for /RPC endpoint
 	http.HandleFunc("/RPC", rpcHandler)
-	
+
 	// Start the server
 	if err := srv.ListenAndServe(); err != nil {
 		fmt.Printf("Failed to start server: %v\n", err)
-	    os.Exit(1)
+		os.Exit(1)
 	}
 }
